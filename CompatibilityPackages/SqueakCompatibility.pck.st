@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2315] on 10 May 2015 at 3:13:48.95328 pm'!
+'From Cuis 4.2 of 25 July 2013 [latest update: #2327] on 16 May 2015 at 5:29:55.7364 pm'!
 'Description Please enter a description for this package'!
-!provides: 'SqueakCompatibility' 1 12!
+!provides: 'SqueakCompatibility' 1 13!
 !classDefinition: #KlattResonatorIndices category: #SqueakCompatibility!
 SharedPool subclass: #KlattResonatorIndices
 	instanceVariableNames: ''
@@ -286,6 +286,10 @@ ifNotNilDo: ifNotNilBlock
 	"Compatibility. Prefer #ifNotNil:"
 	^self ifNotNil: ifNotNilBlock! !
 
+!Object methodsFor: '*squeakCompatibility' stamp: 'jmv 5/14/2015 11:11'!
+isCharacter
+	^false! !
+
 !BlockClosure methodsFor: '*squeakCompatibility' stamp: 'bp 11/29/2014 17:29'!
 cull: firstArg
 	"Activate the receiver, with one or zero arguments."
@@ -423,10 +427,9 @@ asUnicode
 	^self encodedCharSet charsetClass convertToUnicode: self charCode"
 	^self asInteger! !
 
-!Character methodsFor: '*squeakCompatibility' stamp: 'hjh 5/9/2015 17:11'!
+!Character methodsFor: '*squeakCompatibility' stamp: 'jmv 5/14/2015 11:12'!
 isCharacter
-
-	^ true.! !
+	^true! !
 
 !Time class methodsFor: '*squeakCompatibility' stamp: 'jmv 5/8/2015 10:52'!
 totalSeconds

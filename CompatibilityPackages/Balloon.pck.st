@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2310] on 8 May 2015 at 11:55:35.477116 am'!
+'From Cuis 4.2 of 25 July 2013 [latest update: #2327] on 16 May 2015 at 5:28:40.8284 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Balloon' 1 1!
+!provides: 'Balloon' 1 2!
 !classDefinition: #BalloonEngineConstants category: #'Balloon-Engine-Pools'!
 SharedPool subclass: #BalloonEngineConstants
 	instanceVariableNames: ''
@@ -468,12 +468,12 @@ computeInitialStateFrom: source with: transformation
 	end := (transformation localPointToGlobal: source end) asIntegerPoint.
 	via := (transformation localPointToGlobal: source via) asIntegerPoint.! !
 
-!BalloonBezierSimulation methodsFor: 'computing' stamp: 'ar 10/30/1998 02:39'!
+!BalloonBezierSimulation methodsFor: 'computing' stamp: 'jmv 5/14/2015 09:51'!
 computeSplitAt: t
 	"Split the receiver at the parametric value t"
 	| left right newVia1 newVia2 newPoint |
-	left := self clone.
-	right := self clone.
+	left := self copy.
+	right := self copy.
 	"Compute new intermediate points"
 	newVia1 := (via - start) * t + start.
 	newVia2 := (end - via) * t + via.
