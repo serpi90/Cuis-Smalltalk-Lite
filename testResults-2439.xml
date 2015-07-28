@@ -1,5 +1,5 @@
 <?xml  version="1.0" encoding="UTF-8" ?>
-<testsuite errors="5" failures="1" name="TestRunner Suite" tests="710" timestamp="2015-07-18T19:13:22">
+<testsuite errors="5" failures="3" name="TestRunner Suite" tests="710" timestamp="2015-07-28T09:11:05">
 <testcase classname="AffineTransformationTest" name="testComposition" status="passed"/> 
 <testcase classname="AffineTransformationTest" name="testDisplayBounds" status="passed"/> 
 <testcase classname="AffineTransformationTest" name="testFloatInverseTransform" status="passed"/> 
@@ -706,13 +706,17 @@
 <testcase classname="ZipCrcTests" name="testValidZipCrc" status="passed"/> 
 <testcase classname="ClosureCompilerTest" name="testDebuggerTempAccess" status="failed">
 <failed message="Assertion failed" type="assert failure"/> </testcase>
+<testcase classname="DecompilerTests" name="testDecompilerInClassesCAtoCM" status="failed">
+<failed message="ClosureScanner breadthFirstScanClosure" type="assert failure"/> </testcase>
+<testcase classname="DecompilerTests" name="testDecompilerInClassesRAtoRM" status="failed">
+<failed message="ReferencesExplorerWrapper referenceDescriptionFrom:to:count:" type="assert failure"/> </testcase>
 <testcase classname="ExtendedClipboardTest" name="testStar16BitToAndFromImageClipboard" status="error">
-<error message="Error: broken clipboard" type="Error"/> </testcase>
+<error message="Error: Writing to Extended Clipboard not implemented in Windows" type="Error"/> </testcase>
 <testcase classname="ExtendedClipboardTest" name="testStar8BitToAndFromImageClipboard" status="error">
-<error message="Error: broken clipboard" type="Error"/> </testcase>
+<error message="Error: Writing to Extended Clipboard not implemented in Windows" type="Error"/> </testcase>
 <testcase classname="ExtendedClipboardTest" name="testStarToAndFromImageClipboard" status="error">
-<error message="Error: broken clipboard" type="Error"/> </testcase>
+<error message="Error: Writing to Extended Clipboard not implemented in Windows" type="Error"/> </testcase>
 <testcase classname="FFIPluginTests" name="testLongLongs" status="error">
 <error message="Error: Could not coerce arguments" type="Error"/> </testcase>
 <testcase classname="HTTPClientServerTest" name="testUrlEncoding" status="error">
-<error message="Error: Unsupported scheme: http%3a%2f%2flocalhost%3a49542%2fhello%20world" type="Error"/> </testcase></testsuite>
+<error message="Error: Unsupported scheme: http%3a%2f%2flocalhost%3a30519%2fhello%20world" type="Error"/> </testcase></testsuite>
