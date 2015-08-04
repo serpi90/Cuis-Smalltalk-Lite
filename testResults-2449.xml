@@ -1,5 +1,5 @@
 <?xml  version="1.0" encoding="UTF-8" ?>
-<testsuite errors="5" failures="3" name="TestRunner Suite" tests="710" timestamp="2015-07-28T09:11:05">
+<testsuite errors="5" failures="4" name="TestRunner Suite" tests="710" timestamp="2015-08-04T09:52:49">
 <testcase classname="AffineTransformationTest" name="testComposition" status="passed"/> 
 <testcase classname="AffineTransformationTest" name="testDisplayBounds" status="passed"/> 
 <testcase classname="AffineTransformationTest" name="testFloatInverseTransform" status="passed"/> 
@@ -666,7 +666,6 @@
 <testcase classname="TestValueWithinFix" name="testValueWithinTimingRepeat" status="passed"/> 
 <testcase classname="TextEditorTest" name="testSimpleEditor" status="passed"/> 
 <testcase classname="TextEditorTest" name="testUndoRedo" status="passed"/> 
-<testcase classname="ThemesTest" name="testGenerateShoutConfig" status="passed"/> 
 <testcase classname="TimeTest" name="testCreation" status="passed"/> 
 <testcase classname="TimeTest" name="testEqual" status="passed"/> 
 <testcase classname="TimeTest" name="testSqueakInquiries" status="passed"/> 
@@ -710,6 +709,8 @@
 <failed message="ClosureScanner breadthFirstScanClosure" type="assert failure"/> </testcase>
 <testcase classname="DecompilerTests" name="testDecompilerInClassesRAtoRM" status="failed">
 <failed message="ReferencesExplorerWrapper referenceDescriptionFrom:to:count:" type="assert failure"/> </testcase>
+<testcase classname="ThemesTest" name="testGenerateShoutConfig" status="failed">
+<failed message="Assertion failed" type="assert failure"/> </testcase>
 <testcase classname="ExtendedClipboardTest" name="testStar16BitToAndFromImageClipboard" status="error">
 <error message="Error: Writing to Extended Clipboard not implemented in Windows" type="Error"/> </testcase>
 <testcase classname="ExtendedClipboardTest" name="testStar8BitToAndFromImageClipboard" status="error">
@@ -719,4 +720,4 @@
 <testcase classname="FFIPluginTests" name="testLongLongs" status="error">
 <error message="Error: Could not coerce arguments" type="Error"/> </testcase>
 <testcase classname="HTTPClientServerTest" name="testUrlEncoding" status="error">
-<error message="Error: Unsupported scheme: http%3a%2f%2flocalhost%3a30519%2fhello%20world" type="Error"/> </testcase></testsuite>
+<error message="Error: Unsupported scheme: http%3a%2f%2flocalhost%3a17957%2fhello%20world" type="Error"/> </testcase></testsuite>
