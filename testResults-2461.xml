@@ -1,5 +1,5 @@
 <?xml  version="1.0" encoding="UTF-8" ?>
-<testsuite errors="5" failures="4" name="TestRunner Suite" tests="710" timestamp="2015-08-15T18:59:10">
+<testsuite errors="6" failures="4" name="TestRunner Suite" tests="710" timestamp="2015-08-16T11:50:28">
 <testcase classname="AffineTransformationTest" name="testComposition" status="passed"/> 
 <testcase classname="AffineTransformationTest" name="testDisplayBounds" status="passed"/> 
 <testcase classname="AffineTransformationTest" name="testFloatInverseTransform" status="passed"/> 
@@ -295,7 +295,6 @@
 <testcase classname="FmFileManTest" name="testIsRelativePathName" status="passed"/> 
 <testcase classname="FmFileManTest" name="testPathComponents" status="passed"/> 
 <testcase classname="FmFileManTest" name="testPipe" status="passed"/> 
-<testcase classname="FmFileManTest" name="testRecursiveDelete" status="passed"/> 
 <testcase classname="FmFileManTest" name="testRefresh" status="passed"/> 
 <testcase classname="FmFileManTest" name="testRename" status="passed"/> 
 <testcase classname="FmFileManTest" name="testRoot" status="passed"/> 
@@ -719,5 +718,7 @@
 <error message="Error: Writing to Extended Clipboard not implemented in Windows" type="Error"/> </testcase>
 <testcase classname="FFIPluginTests" name="testLongLongs" status="error">
 <error message="Error: Could not coerce arguments" type="Error"/> </testcase>
+<testcase classname="FmFileManTest" name="testRecursiveDelete" status="error">
+<error message="Error: primDeleteDirectory: failed" type="Error"/> </testcase>
 <testcase classname="HTTPClientServerTest" name="testUrlEncoding" status="error">
-<error message="Error: Unsupported scheme: http%3a%2f%2flocalhost%3a24130%2fhello%20world" type="Error"/> </testcase></testsuite>
+<error message="Error: Unsupported scheme: http%3a%2f%2flocalhost%3a12931%2fhello%20world" type="Error"/> </testcase></testsuite>
