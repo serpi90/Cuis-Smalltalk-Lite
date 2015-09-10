@@ -1,5 +1,5 @@
 <?xml  version="1.0" encoding="UTF-8" ?>
-<testsuite errors="5" failures="4" name="TestRunner Suite" tests="710" timestamp="2015-08-17T13:38:30">
+<testsuite errors="5" failures="5" name="TestRunner Suite" tests="714" timestamp="2015-09-09T22:48:30">
 <testcase classname="AffineTransformationTest" name="testComposition" status="passed"/> 
 <testcase classname="AffineTransformationTest" name="testDisplayBounds" status="passed"/> 
 <testcase classname="AffineTransformationTest" name="testFloatInverseTransform" status="passed"/> 
@@ -300,6 +300,8 @@
 <testcase classname="FmFileManTest" name="testRename" status="passed"/> 
 <testcase classname="FmFileManTest" name="testRoot" status="passed"/> 
 <testcase classname="FmFileManTest" name="testStream" status="passed"/> 
+<testcase classname="FmFileManTest" name="testTryReadStream" status="passed"/> 
+<testcase classname="FmFileManTest" name="testTryWriteStream" status="passed"/> 
 <testcase classname="FractionTest" name="testDegreeCos" status="passed"/> 
 <testcase classname="FractionTest" name="testDegreeSin" status="passed"/> 
 <testcase classname="FractionTest" name="testExactRaisedTo" status="passed"/> 
@@ -578,6 +580,8 @@
 <testcase classname="NumberTest" name="testRaisedToIntegerWithFloats" status="passed"/> 
 <testcase classname="NumberTest" name="testReadFrom" status="passed"/> 
 <testcase classname="NumberTest" name="testReciprocal" status="passed"/> 
+<testcase classname="OpenCLTest" name="testCopyToAndFromBuffer" status="passed"/> 
+<testcase classname="OpenCLTest" name="testFinalization" status="passed"/> 
 <testcase classname="OrderedCollectionTest" name="testCollectAsReceiverIsModified" status="passed"/> 
 <testcase classname="OrderedCollectionTest" name="testDoAsReceiverIsModified" status="passed"/> 
 <testcase classname="OrderedCollectionTest" name="testReverseDoAsReceiverIsModified" status="passed"/> 
@@ -707,6 +711,8 @@
 <failed message="Assertion failed" type="assert failure"/> </testcase>
 <testcase classname="DecompilerTests" name="testDecompilerInClassesCAtoCM" status="failed">
 <failed message="ClosureScanner breadthFirstScanClosure" type="assert failure"/> </testcase>
+<testcase classname="DecompilerTests" name="testDecompilerInClassesONtoOZ" status="failed">
+<failed message="OpenCLPlatform allDeviceIDsOfType:" type="assert failure"/> </testcase>
 <testcase classname="DecompilerTests" name="testDecompilerInClassesRAtoRM" status="failed">
 <failed message="ReferencesExplorerWrapper referenceDescriptionFrom:to:count:" type="assert failure"/> </testcase>
 <testcase classname="ThemesTest" name="testGenerateShoutConfig" status="failed">
@@ -720,4 +726,4 @@
 <testcase classname="FFIPluginTests" name="testLongLongs" status="error">
 <error message="Error: Could not coerce arguments" type="Error"/> </testcase>
 <testcase classname="HTTPClientServerTest" name="testUrlEncoding" status="error">
-<error message="Error: Unsupported scheme: http%3a%2f%2flocalhost%3a19347%2fhello%20world" type="Error"/> </testcase></testsuite>
+<error message="Error: Unsupported scheme: http%3a%2f%2flocalhost%3a28091%2fhello%20world" type="Error"/> </testcase></testsuite>
