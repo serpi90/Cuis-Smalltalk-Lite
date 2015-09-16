@@ -1,5 +1,5 @@
 <?xml  version="1.0" encoding="UTF-8" ?>
-<testsuite errors="5" failures="5" name="TestRunner Suite" tests="714" timestamp="2015-09-09T22:48:30">
+<testsuite errors="7" failures="9" name="TestRunner Suite" tests="714" timestamp="2015-09-16T13:33:23">
 <testcase classname="AffineTransformationTest" name="testComposition" status="passed"/> 
 <testcase classname="AffineTransformationTest" name="testDisplayBounds" status="passed"/> 
 <testcase classname="AffineTransformationTest" name="testFloatInverseTransform" status="passed"/> 
@@ -28,7 +28,6 @@
 <testcase classname="CharacterTest" name="testToUtf8" status="passed"/> 
 <testcase classname="ClosureCompilerTest" name="testBlockDoitDecompilation" status="passed"/> 
 <testcase classname="ClosureCompilerTest" name="testBlockNumbering" status="passed"/> 
-<testcase classname="ClosureCompilerTest" name="testBlockNumberingForInjectInto" status="passed"/> 
 <testcase classname="ClosureCompilerTest" name="testDecompiledDoitMethodTempNames" status="passed"/> 
 <testcase classname="ClosureCompilerTest" name="testInjectIntoDecompilationsEncoderForV3" status="passed"/> 
 <testcase classname="ClosureCompilerTest" name="testInjectIntoDecompilationsEncoderForV3PlusClosures" status="passed"/> 
@@ -39,10 +38,6 @@
 <testcase classname="ClosureCompilerTest" name="testInlineBlockCollectionLR3" status="passed"/> 
 <testcase classname="ClosureCompilerTest" name="testInlineBlockCollectionSD1" status="passed"/> 
 <testcase classname="ClosureCompilerTest" name="testMethodAndNodeTempNames" status="passed"/> 
-<testcase classname="ClosureCompilerTest" name="testSourceRangeAccessForBlueBookInjectInto" status="passed"/> 
-<testcase classname="ClosureCompilerTest" name="testSourceRangeAccessForClosureBytecodeInjectInto" status="passed"/> 
-<testcase classname="ClosureCompilerTest" name="testSourceRangeAccessForInjectInto" status="passed"/> 
-<testcase classname="ClosureCompilerTest" name="testTempNameAccessForInjectInto" status="passed"/> 
 <testcase classname="ClosureTests" name="testBlockArgument" status="passed"/> 
 <testcase classname="ClosureTests" name="testBlockTemp" status="passed"/> 
 <testcase classname="ClosureTests" name="testCopyNonLocalReturn" status="passed"/> 
@@ -284,7 +279,6 @@
 <testcase classname="FloatTest" name="testZero1" status="passed"/> 
 <testcase classname="FloatTest" name="testZero2" status="passed"/> 
 <testcase classname="FloatTest" name="testZeroSignificandAsInteger" status="passed"/> 
-<testcase classname="FmFileIOAccessorTest" name="testDirectoryExists" status="passed"/> 
 <testcase classname="FmFileManTest" name="testAbsolutePath" status="passed"/> 
 <testcase classname="FmFileManTest" name="testAtPut" status="passed"/> 
 <testcase classname="FmFileManTest" name="testConcatenation" status="passed"/> 
@@ -707,7 +701,15 @@
 <testcase classname="ZipCrcTests" name="testValidGZipCrc" status="passed"/> 
 <testcase classname="ZipCrcTests" name="testValidZLibCrc" status="passed"/> 
 <testcase classname="ZipCrcTests" name="testValidZipCrc" status="passed"/> 
+<testcase classname="ClosureCompilerTest" name="testBlockNumberingForInjectInto" status="failed">
+<failed message="Assertion failed" type="assert failure"/> </testcase>
 <testcase classname="ClosureCompilerTest" name="testDebuggerTempAccess" status="failed">
+<failed message="Assertion failed" type="assert failure"/> </testcase>
+<testcase classname="ClosureCompilerTest" name="testSourceRangeAccessForBlueBookInjectInto" status="failed">
+<failed message="Assertion failed" type="assert failure"/> </testcase>
+<testcase classname="ClosureCompilerTest" name="testSourceRangeAccessForClosureBytecodeInjectInto" status="failed">
+<failed message="Assertion failed" type="assert failure"/> </testcase>
+<testcase classname="ClosureCompilerTest" name="testSourceRangeAccessForInjectInto" status="failed">
 <failed message="Assertion failed" type="assert failure"/> </testcase>
 <testcase classname="DecompilerTests" name="testDecompilerInClassesCAtoCM" status="failed">
 <failed message="ClosureScanner breadthFirstScanClosure" type="assert failure"/> </testcase>
@@ -717,6 +719,8 @@
 <failed message="ReferencesExplorerWrapper referenceDescriptionFrom:to:count:" type="assert failure"/> </testcase>
 <testcase classname="ThemesTest" name="testGenerateShoutConfig" status="failed">
 <failed message="Assertion failed" type="assert failure"/> </testcase>
+<testcase classname="ClosureCompilerTest" name="testTempNameAccessForInjectInto" status="error">
+<error message="Error: subscript is out of bounds: 0" type="Error"/> </testcase>
 <testcase classname="ExtendedClipboardTest" name="testStar16BitToAndFromImageClipboard" status="error">
 <error message="Error: Writing to Extended Clipboard not implemented in Windows" type="Error"/> </testcase>
 <testcase classname="ExtendedClipboardTest" name="testStar8BitToAndFromImageClipboard" status="error">
@@ -725,5 +729,7 @@
 <error message="Error: Writing to Extended Clipboard not implemented in Windows" type="Error"/> </testcase>
 <testcase classname="FFIPluginTests" name="testLongLongs" status="error">
 <error message="Error: Could not coerce arguments" type="Error"/> </testcase>
+<testcase classname="FmFileIOAccessorTest" name="testDirectoryExists" status="error">
+<error message="MessageNotUnderstood: FmFileIOAccessor class&gt;&gt;defaultDirectoryPath" type="MessageNotUnderstood"/> </testcase>
 <testcase classname="HTTPClientServerTest" name="testUrlEncoding" status="error">
-<error message="Error: Unsupported scheme: http%3a%2f%2flocalhost%3a28091%2fhello%20world" type="Error"/> </testcase></testsuite>
+<error message="Error: Unsupported scheme: http%3a%2f%2flocalhost%3a15533%2fhello%20world" type="Error"/> </testcase></testsuite>
