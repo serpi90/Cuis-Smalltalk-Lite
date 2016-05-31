@@ -1,12 +1,27 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2778] on 25 May 2016 at 1:57:07.78956 am'!
-!classDefinition: #Entry category: #'System-FileMan-Core'!
-Object subclass: #Entry
+'From Cuis 4.2 of 25 July 2013 [latest update: #2781] on 31 May 2016 at 1:06:42.21371 pm'!
+!classDefinition: #FileIOAccessor category: #'System-FileMan-Core'!
+Object subclass: #FileIOAccessor
+	instanceVariableNames: 'slash drives'
+	classVariableNames: 'Default'
+	poolDictionaries: ''
+	category: 'System-FileMan-Core'!
+
+!FileIOAccessor commentStamp: '<historical>' prior: 0!
+I am an accessor to the low level file IO.
+
+You can extend/rewrite me if you port FileMan to other Smalltalk dialects.
+
+---
+mu 3/13/2007 11:11!
+
+!classDefinition: #FileSystemEntry category: #'System-FileMan-Core'!
+Object subclass: #FileSystemEntry
 	instanceVariableNames: 'drive pathComponents parent name creationTime modificationTime'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'System-FileMan-Core'!
 
-!Entry commentStamp: 'pb 5/25/2016 00:35' prior: 0!
+!FileSystemEntry commentStamp: 'jmv 5/31/2016 10:37' prior: 0!
 I represent a single file entry (including directory).
 
 You can write data by #fileContents: , and read the data by #fileContents.
@@ -23,29 +38,14 @@ See categories starting with '*fileman-' in String.
 	Smalltalk imageName asFileEntry fileSize
 	Smalltalk imageName asFileEntry parent directories do: [ :a | a print ]!
 
-!classDefinition: #FileIOAccessor category: #'System-FileMan-Core'!
-Object subclass: #FileIOAccessor
-	instanceVariableNames: 'slash drives'
-	classVariableNames: 'Default'
-	poolDictionaries: ''
-	category: 'System-FileMan-Core'!
-
-!FileIOAccessor commentStamp: '<historical>' prior: 0!
-I am an accessor to the low level file IO.
-
-You can extend/rewrite me if you port FileMan to other Smalltalk dialects.
-
----
-mu 3/13/2007 11:11!
-
 !classDefinition: #DirectoryEntry category: #'System-FileMan-Core'!
-Entry subclass: #DirectoryEntry
+FileSystemEntry subclass: #DirectoryEntry
 	instanceVariableNames: 'children'
 	classVariableNames: 'CurrentDirectory ImageDirectory VMDirectory'
 	poolDictionaries: ''
 	category: 'System-FileMan-Core'!
 
-!DirectoryEntry commentStamp: 'pb 5/25/2016 00:38' prior: 0!
+!DirectoryEntry commentStamp: 'jmv 5/31/2016 10:42' prior: 0!
 I represent a single file directory.
 I implement various directory specific behaviors.
 
@@ -63,13 +63,13 @@ Some examples:
 See FileEntry!
 
 !classDefinition: #FileEntry category: #'System-FileMan-Core'!
-Entry subclass: #FileEntry
+FileSystemEntry subclass: #FileEntry
 	instanceVariableNames: 'fileSize'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'System-FileMan-Core'!
 
-!FileEntry commentStamp: 'pb 5/25/2016 00:35' prior: 0!
+!FileEntry commentStamp: 'jmv 5/31/2016 10:36' prior: 0!
 I represent a single file entry.
 
 You can write data by #fileContents: , and read the data by #fileContents.
@@ -85,265 +85,6 @@ See DirectoryEntry.
 See categories starting with '*fileman-' in String.
 	Smalltalk imageName asFileEntry fileSize
 	Smalltalk imageName asFileEntry parent directories do: [ :a | a print ]!
-
-
-!Entry methodsFor: 'comparing' stamp: 'pb 5/25/2016 00:31'!
-= aFileEntry
-	| isCaseSensitive myDrive otherDrive |
-	self class = aFileEntry class ifFalse: [ ^false ].
-
-	isCaseSensitive _ self fileAccessor isCaseSensitive.
-
-	"Check for drive nil or same."
-	myDrive _ self drive.
-	otherDrive _ aFileEntry drive.
-	isCaseSensitive
-		ifTrue: [ self drive = aFileEntry drive ifFalse: [ ^false ]]
-		ifFalse: [
-			myDrive isNil = otherDrive isNil ifFalse: [ ^false ].		"only one of them is nil"
-			myDrive ifNotNil: [											"none is nil"
-				(myDrive sameAs: otherDrive) ifFalse: [ ^false ]]].
-
-	"Check for all path components same."
-	self pathComponents with: aFileEntry pathComponents do: [ :mine :other |
-		isCaseSensitive
-			ifTrue: [ mine = other ifFalse: [ ^false ]]
-			ifFalse: [ (mine sameAs: other) ifFalse: [ ^false ]]].
-
-	^ true! !
-
-!Entry methodsFor: 'comparing' stamp: 'pb 5/25/2016 00:31'!
-hash
-	^self pathComponents hash! !
-
-!Entry methodsFor: 'accessing-file name' stamp: 'pb 5/25/2016 00:31'!
-baseName
-	^self nameVersionExtension first! !
-
-!Entry methodsFor: 'accessing-file name' stamp: 'pb 5/25/2016 00:31'!
-extension
-	^self fileAccessor extensionFor: name! !
-
-!Entry methodsFor: 'accessing-file name' stamp: 'pb 5/25/2016 00:31'!
-nameVersionExtension
-	^self fileAccessor splitNameVersionExtensionFor: self name! !
-
-!Entry methodsFor: 'accessing-file name' stamp: 'pb 5/25/2016 00:31'!
-nameWithoutExtension
-	"
-	'writings.txt' asFileEntry nameWithoutExtension
-	'folder.ext/writings.txt' asFileEntry nameWithoutExtension
-	'folder.ext/writings' asFileEntry nameWithoutExtension
-	"
-	^self fileAccessor baseNameFor: name! !
-
-!Entry methodsFor: 'accessing-file name' stamp: 'pb 5/25/2016 00:31'!
-version
-	^self nameVersionExtension second! !
-
-!Entry methodsFor: 'accessing' stamp: 'pb 5/25/2016 00:31'!
-basicPathComponents: aCollection
-	pathComponents := aCollection! !
-
-!Entry methodsFor: 'accessing' stamp: 'pb 5/25/2016 00:31'!
-creationTime
-	creationTime ifNil: [self initValuesFromParent].
-	^creationTime! !
-
-!Entry methodsFor: 'accessing' stamp: 'pb 5/25/2016 00:31'!
-creationTime: value
-	creationTime := value! !
-
-!Entry methodsFor: 'accessing' stamp: 'pb 5/25/2016 00:31'!
-drive
-	self fileAccessor onUnix ifTrue: [^ drive := nil].
-	^ drive! !
-
-!Entry methodsFor: 'accessing' stamp: 'pb 5/25/2016 00:31'!
-drive: aString
-	drive := aString! !
-
-!Entry methodsFor: 'accessing' stamp: 'pb 5/25/2016 00:31'!
-modificationTime
-	modificationTime ifNil: [self initValuesFromParent].
-	^modificationTime! !
-
-!Entry methodsFor: 'accessing' stamp: 'pb 5/25/2016 00:31'!
-modificationTime: value
-	modificationTime := value! !
-
-!Entry methodsFor: 'accessing' stamp: 'pb 5/25/2016 00:31'!
-name
-	^name ifNil: [ drive ]! !
-
-!Entry methodsFor: 'accessing' stamp: 'pb 5/25/2016 00:31'!
-name: aString 
-	name := aString.
-	self pathComponents
-		ifNotEmpty: [self pathComponents at: self pathComponents size put: name]! !
-
-!Entry methodsFor: 'accessing' stamp: 'pb 5/25/2016 00:31'!
-parent
-	parent ifNil: [parent := self ensureParent].
-	^parent! !
-
-!Entry methodsFor: 'accessing' stamp: 'pb 5/25/2016 00:31'!
-parent: aFmDirectory
-
-	parent _ aFmDirectory.
-	drive _ aFmDirectory drive. "harmless if no drive supported, as in Unix"
-	pathComponents _ aFmDirectory pathComponents copyWith: name! !
-
-!Entry methodsFor: 'accessing' stamp: 'pb 5/25/2016 00:31'!
-parents
-	| ord par |
-	par := self parent.
-	ord := OrderedCollection with: par.
-	[par isRoot] whileFalse: [
-		par := par parent.
-		ord add: par.
-	].
-	^ord! !
-
-!Entry methodsFor: 'accessing' stamp: 'pb 5/25/2016 00:31'!
-pathComponents
-	pathComponents ifNil: [pathComponents _ #() ].
-	^pathComponents! !
-
-!Entry methodsFor: 'accessing' stamp: 'pb 5/25/2016 00:31'!
-pathName
-
-	^ String streamContents: [ :stream |
-		self printPathOn: stream ]! !
-
-!Entry methodsFor: 'private' stamp: 'pb 5/25/2016 00:35'!
-ensureParent
-	self pathComponents isEmpty
-		ifTrue: [^ nil].
-	parent := DirectoryEntry
-				pathComponents: (self pathComponents copyFrom: 1 to: self pathComponents size - 1)
-				drive: self drive.
-	^ parent! !
-
-!Entry methodsFor: 'private' stamp: 'pb 5/25/2016 00:40'!
-fileAccessor
-
-	^FileIOAccessor default! !
-
-!Entry methodsFor: 'private' stamp: 'pb 5/25/2016 00:31'!
-initValuesFrom: otherEntry
-	otherEntry ifNil: [^self].
-	self creationTime: otherEntry creationTime.
-	self modificationTime: otherEntry modificationTime! !
-
-!Entry methodsFor: 'private' stamp: 'pb 5/25/2016 00:31'!
-initValuesFromParent
-	| targets target |
-	self ensureParent.
-	self parent ifNil: [ ^self ].
-
-	targets := self isDirectory ifTrue: [ self parent directories ] ifFalse: [ self parent files ].
-	target := targets detect: [ :each | each = self ] ifNone: [
-		^ self ].
-
-	self initValuesFrom: target! !
-
-!Entry methodsFor: 'private' stamp: 'pb 5/25/2016 00:31'!
-setContentsOf: aStream to: aStringOrBytes
-
-	aStringOrBytes isString
-		ifFalse: [ aStream binary].
-	aStream nextPutAll: aStringOrBytes! !
-
-!Entry methodsFor: 'private' stamp: 'pb 5/25/2016 00:38'!
-setParent: anFileEntry
-	parent := anFileEntry! !
-
-!Entry methodsFor: 'testing' stamp: 'pb 5/25/2016 00:31'!
-isDirectory
-	^false! !
-
-!Entry methodsFor: 'testing' stamp: 'pb 5/25/2016 00:31'!
-isFile
-	^false! !
-
-!Entry methodsFor: 'testing' stamp: 'pb 5/25/2016 00:31'!
-isRoot
-	^self parent isNil! !
-
-!Entry methodsFor: 'initialize-release' stamp: 'pb 5/25/2016 00:31'!
-pathComponents: aCollection
-	self pathComponents: aCollection detectDrive: true! !
-
-!Entry methodsFor: 'initialize-release' stamp: 'pb 5/25/2016 00:31'!
-pathComponents: tokens detectDrive: detectDrive
-	| firstToken  |
-	tokens isEmptyOrNil ifTrue: [ ^pathComponents _ nil ].
-	(detectDrive and: [ (firstToken _ tokens first) isDriveName])
-		ifTrue: [
-			self drive: firstToken.
-			self basicPathComponents: (tokens copyFrom: 2 to: tokens size)]
-		ifFalse: [ self basicPathComponents: tokens ].
-
-	pathComponents ifNotEmpty: [ self name: pathComponents last ]! !
-
-!Entry methodsFor: 'initialize-release' stamp: 'pb 5/25/2016 00:40'!
-pathName: aString 
-	| tokens guessedDriveName |
-	tokens _ FileIOAccessor default absolutePathComponentsFor: aString.
-	tokens ifEmpty: [^ nil].
-	self fileAccessor isDriveSupported
-		 ifTrue: [
-			guessedDriveName := tokens first asDriveName.
-			guessedDriveName ifNotNil: [
-				self drive: guessedDriveName.
-				tokens := tokens copyFrom: 2 to: tokens size ]].
-	self pathComponents: tokens! !
-
-!Entry methodsFor: 'initialize-release' stamp: 'pb 5/25/2016 00:31'!
-refresh
-	creationTime := modificationTime := nil! !
-
-!Entry methodsFor: 'printing' stamp: 'pb 5/25/2016 00:31'!
-printOn: aStream 
-	self printPathOn: aStream! !
-
-!Entry methodsFor: 'printing' stamp: 'pb 5/25/2016 00:31'!
-printPathOn: aStream 
-	self drive
-		ifNotNil: [:d | aStream nextPutAll: d].
-	aStream nextPutAll: self fileAccessor slash.
-	self pathComponents
-		do: [:each | aStream nextPutAll: each]
-		separatedBy: [aStream nextPutAll: self fileAccessor slash]! !
-
-
-!Entry class methodsFor: 'instance creation' stamp: 'pb 5/25/2016 00:31'!
-pathComponents: comps
-	| inst |
-	inst := self new.
-	inst pathComponents: comps.
-	^inst! !
-
-!Entry class methodsFor: 'instance creation' stamp: 'pb 5/25/2016 00:31'!
-pathComponents: comps drive: driveString
-	| inst |
-	inst := self new.
-	inst pathComponents: comps detectDrive: false.
-	inst drive: driveString.
-	^inst! !
-
-!Entry class methodsFor: 'instance creation' stamp: 'pb 5/25/2016 00:31'!
-pathName: aString
-	| inst |
-	inst := self new.
-	inst pathName: aString.
-	^inst! !
-
-!Entry class methodsFor: 'class state access' stamp: 'pb 5/25/2016 00:31'!
-releaseClassCachedState
-
-	self allSubInstancesDo: [ :each | each refresh]! !
 
 
 !FileIOAccessor methodsFor: 'actions' stamp: 'pb 5/25/2016 00:36'!
@@ -400,11 +141,11 @@ deleteFile: fullPathName ifAbsent: failBlock
 			forFileNamed: fullPathName) 
 		ifFalse: [^ failBlock value]! !
 
-!FileIOAccessor methodsFor: 'actions' stamp: 'pb 5/25/2016 00:37'!
-fileOrDirectoryExists: localName in: anDirectoryEntry
+!FileIOAccessor methodsFor: 'actions' stamp: 'jmv 5/31/2016 10:37'!
+fileOrDirectoryExists: localName in: aDirectoryEntry
 
 	| entryNames |
-	entryNames := self entryNamesIn: anDirectoryEntry.
+	entryNames := self entryNamesIn: aDirectoryEntry.
 
 	^self isCaseSensitive 
 		ifTrue:[entryNames includes: localName]
@@ -584,23 +325,23 @@ copyFile: fileStream1 toFile: fileStream2
 		[fileStream2 nextPutAll: (fileStream1 nextInto: buffer)].
 ! !
 
-!FileIOAccessor methodsFor: 'utilities' stamp: 'pb 5/25/2016 00:37'!
-directoryNamesIn: anDirectoryEntry
+!FileIOAccessor methodsFor: 'utilities' stamp: 'jmv 5/31/2016 10:47'!
+directoryNamesIn: aDirectoryEntry
 	"
 	FileIOAccessor default directoryNamesIn: 'C:\Windows' asDirectoryEntry
 	"
 	
-	^(self entriesIn: anDirectoryEntry)
+	^(self entriesIn: aDirectoryEntry)
 		select: [ :each | each isDirectory]
 		thenCollect: [ :each | each name]! !
 
-!FileIOAccessor methodsFor: 'utilities' stamp: 'pb 5/25/2016 00:37'!
-entryNamesIn: anDirectoryEntry
+!FileIOAccessor methodsFor: 'utilities' stamp: 'jmv 5/31/2016 10:48'!
+entryNamesIn: aDirectoryEntry
 	"
 	FileIOAccessor default entryNamesIn: 'C:\Windows\' asDirectoryEntry
 	"
 	
-	^(self entriesIn: anDirectoryEntry) collect: [ :each | each name]! !
+	^(self entriesIn: aDirectoryEntry) collect: [ :each | each name]! !
 
 !FileIOAccessor methodsFor: 'utilities' stamp: 'pb 5/25/2016 00:42'!
 extensionFor: pathName 
@@ -631,13 +372,13 @@ fileExists: fileEntry
 	f close.
 	^ true! !
 
-!FileIOAccessor methodsFor: 'utilities' stamp: 'pb 5/25/2016 00:42'!
-fileNamesIn: anDirectoryEntry
+!FileIOAccessor methodsFor: 'utilities' stamp: 'jmv 5/31/2016 10:48'!
+fileNamesIn: aDirectoryEntry
 	"
 	FileIOAccessor default fileNamesIn: 'C:\Windows' asDirectoryEntry
 	"
 	
-	^((self entriesIn: anDirectoryEntry)
+	^((self entriesIn: aDirectoryEntry)
 		reject: [ :each | each isDirectory ])
 		collect: [ :each | each name ]! !
 
@@ -853,6 +594,265 @@ releaseClassCachedState
 	Default _ nil! !
 
 
+!FileSystemEntry methodsFor: 'comparing' stamp: 'jmv 5/31/2016 10:23'!
+= aFileEntry
+	| isCaseSensitive myDrive otherDrive |
+	self class = aFileEntry class ifFalse: [ ^false ].
+
+	isCaseSensitive _ self fileAccessor isCaseSensitive.
+
+	"Check for drive nil or same."
+	myDrive _ self drive.
+	otherDrive _ aFileEntry drive.
+	isCaseSensitive
+		ifTrue: [ self drive = aFileEntry drive ifFalse: [ ^false ]]
+		ifFalse: [
+			myDrive isNil = otherDrive isNil ifFalse: [ ^false ].		"only one of them is nil"
+			myDrive ifNotNil: [											"none is nil"
+				(myDrive sameAs: otherDrive) ifFalse: [ ^false ]]].
+
+	"Check for all path components same."
+	self pathComponents with: aFileEntry pathComponents do: [ :mine :other |
+		isCaseSensitive
+			ifTrue: [ mine = other ifFalse: [ ^false ]]
+			ifFalse: [ (mine sameAs: other) ifFalse: [ ^false ]]].
+
+	^ true! !
+
+!FileSystemEntry methodsFor: 'comparing' stamp: 'jmv 5/31/2016 10:23'!
+hash
+	^self pathComponents hash! !
+
+!FileSystemEntry methodsFor: 'accessing-file name' stamp: 'jmv 5/31/2016 10:23'!
+baseName
+	^self nameVersionExtension first! !
+
+!FileSystemEntry methodsFor: 'accessing-file name' stamp: 'jmv 5/31/2016 10:23'!
+extension
+	^self fileAccessor extensionFor: name! !
+
+!FileSystemEntry methodsFor: 'accessing-file name' stamp: 'jmv 5/31/2016 10:23'!
+nameVersionExtension
+	^self fileAccessor splitNameVersionExtensionFor: self name! !
+
+!FileSystemEntry methodsFor: 'accessing-file name' stamp: 'jmv 5/31/2016 10:23'!
+nameWithoutExtension
+	"
+	'writings.txt' asFileEntry nameWithoutExtension
+	'folder.ext/writings.txt' asFileEntry nameWithoutExtension
+	'folder.ext/writings' asFileEntry nameWithoutExtension
+	"
+	^self fileAccessor baseNameFor: name! !
+
+!FileSystemEntry methodsFor: 'accessing-file name' stamp: 'jmv 5/31/2016 10:23'!
+version
+	^self nameVersionExtension second! !
+
+!FileSystemEntry methodsFor: 'accessing' stamp: 'jmv 5/31/2016 10:23'!
+basicPathComponents: aCollection
+	pathComponents := aCollection! !
+
+!FileSystemEntry methodsFor: 'accessing' stamp: 'jmv 5/31/2016 10:23'!
+creationTime
+	creationTime ifNil: [self initValuesFromParent].
+	^creationTime! !
+
+!FileSystemEntry methodsFor: 'accessing' stamp: 'jmv 5/31/2016 10:23'!
+creationTime: value
+	creationTime := value! !
+
+!FileSystemEntry methodsFor: 'accessing' stamp: 'jmv 5/31/2016 10:23'!
+drive
+	self fileAccessor onUnix ifTrue: [^ drive := nil].
+	^ drive! !
+
+!FileSystemEntry methodsFor: 'accessing' stamp: 'jmv 5/31/2016 10:23'!
+drive: aString
+	drive := aString! !
+
+!FileSystemEntry methodsFor: 'accessing' stamp: 'jmv 5/31/2016 10:23'!
+modificationTime
+	modificationTime ifNil: [self initValuesFromParent].
+	^modificationTime! !
+
+!FileSystemEntry methodsFor: 'accessing' stamp: 'jmv 5/31/2016 10:23'!
+modificationTime: value
+	modificationTime := value! !
+
+!FileSystemEntry methodsFor: 'accessing' stamp: 'jmv 5/31/2016 10:23'!
+name
+	^name ifNil: [ drive ]! !
+
+!FileSystemEntry methodsFor: 'accessing' stamp: 'jmv 5/31/2016 10:23'!
+name: aString 
+	name := aString.
+	self pathComponents
+		ifNotEmpty: [self pathComponents at: self pathComponents size put: name]! !
+
+!FileSystemEntry methodsFor: 'accessing' stamp: 'jmv 5/31/2016 10:23'!
+parent
+	parent ifNil: [parent := self ensureParent].
+	^parent! !
+
+!FileSystemEntry methodsFor: 'accessing' stamp: 'jmv 5/31/2016 10:23'!
+parent: aFmDirectory
+
+	parent _ aFmDirectory.
+	drive _ aFmDirectory drive. "harmless if no drive supported, as in Unix"
+	pathComponents _ aFmDirectory pathComponents copyWith: name! !
+
+!FileSystemEntry methodsFor: 'accessing' stamp: 'jmv 5/31/2016 10:23'!
+parents
+	| ord par |
+	par := self parent.
+	ord := OrderedCollection with: par.
+	[par isRoot] whileFalse: [
+		par := par parent.
+		ord add: par.
+	].
+	^ord! !
+
+!FileSystemEntry methodsFor: 'accessing' stamp: 'jmv 5/31/2016 10:23'!
+pathComponents
+	pathComponents ifNil: [pathComponents _ #() ].
+	^pathComponents! !
+
+!FileSystemEntry methodsFor: 'accessing' stamp: 'jmv 5/31/2016 10:23'!
+pathName
+
+	^ String streamContents: [ :stream |
+		self printPathOn: stream ]! !
+
+!FileSystemEntry methodsFor: 'private' stamp: 'jmv 5/31/2016 10:26'!
+ensureParent
+	self pathComponents isEmpty
+		ifTrue: [^ nil].
+	parent := DirectoryEntry
+				pathComponents: (self pathComponents copyFrom: 1 to: self pathComponents size - 1)
+				drive: self drive.
+	^ parent! !
+
+!FileSystemEntry methodsFor: 'private' stamp: 'jmv 5/31/2016 10:45'!
+fileAccessor
+
+	^FileIOAccessor default! !
+
+!FileSystemEntry methodsFor: 'private' stamp: 'jmv 5/31/2016 10:23'!
+initValuesFrom: otherEntry
+	otherEntry ifNil: [^self].
+	self creationTime: otherEntry creationTime.
+	self modificationTime: otherEntry modificationTime! !
+
+!FileSystemEntry methodsFor: 'private' stamp: 'jmv 5/31/2016 10:23'!
+initValuesFromParent
+	| targets target |
+	self ensureParent.
+	self parent ifNil: [ ^self ].
+
+	targets := self isDirectory ifTrue: [ self parent directories ] ifFalse: [ self parent files ].
+	target := targets detect: [ :each | each = self ] ifNone: [
+		^ self ].
+
+	self initValuesFrom: target! !
+
+!FileSystemEntry methodsFor: 'private' stamp: 'jmv 5/31/2016 10:23'!
+setContentsOf: aStream to: aStringOrBytes
+
+	aStringOrBytes isString
+		ifFalse: [ aStream binary].
+	aStream nextPutAll: aStringOrBytes! !
+
+!FileSystemEntry methodsFor: 'private' stamp: 'jmv 5/31/2016 10:43'!
+setParent: aDirectoryEntry
+	parent := aDirectoryEntry! !
+
+!FileSystemEntry methodsFor: 'testing' stamp: 'jmv 5/31/2016 10:23'!
+isDirectory
+	^false! !
+
+!FileSystemEntry methodsFor: 'testing' stamp: 'jmv 5/31/2016 10:23'!
+isFile
+	^false! !
+
+!FileSystemEntry methodsFor: 'testing' stamp: 'jmv 5/31/2016 10:23'!
+isRoot
+	^self parent isNil! !
+
+!FileSystemEntry methodsFor: 'initialize-release' stamp: 'jmv 5/31/2016 10:23'!
+pathComponents: aCollection
+	self pathComponents: aCollection detectDrive: true! !
+
+!FileSystemEntry methodsFor: 'initialize-release' stamp: 'jmv 5/31/2016 10:23'!
+pathComponents: tokens detectDrive: detectDrive
+	| firstToken  |
+	tokens isEmptyOrNil ifTrue: [ ^pathComponents _ nil ].
+	(detectDrive and: [ (firstToken _ tokens first) isDriveName])
+		ifTrue: [
+			self drive: firstToken.
+			self basicPathComponents: (tokens copyFrom: 2 to: tokens size)]
+		ifFalse: [ self basicPathComponents: tokens ].
+
+	pathComponents ifNotEmpty: [ self name: pathComponents last ]! !
+
+!FileSystemEntry methodsFor: 'initialize-release' stamp: 'jmv 5/31/2016 10:45'!
+pathName: aString 
+	| tokens guessedDriveName |
+	tokens _ FileIOAccessor default absolutePathComponentsFor: aString.
+	tokens ifEmpty: [^ nil].
+	self fileAccessor isDriveSupported
+		 ifTrue: [
+			guessedDriveName := tokens first asDriveName.
+			guessedDriveName ifNotNil: [
+				self drive: guessedDriveName.
+				tokens := tokens copyFrom: 2 to: tokens size ]].
+	self pathComponents: tokens! !
+
+!FileSystemEntry methodsFor: 'initialize-release' stamp: 'jmv 5/31/2016 10:23'!
+refresh
+	creationTime := modificationTime := nil! !
+
+!FileSystemEntry methodsFor: 'printing' stamp: 'jmv 5/31/2016 10:23'!
+printOn: aStream 
+	self printPathOn: aStream! !
+
+!FileSystemEntry methodsFor: 'printing' stamp: 'jmv 5/31/2016 10:23'!
+printPathOn: aStream 
+	self drive
+		ifNotNil: [:d | aStream nextPutAll: d].
+	aStream nextPutAll: self fileAccessor slash.
+	self pathComponents
+		do: [:each | aStream nextPutAll: each]
+		separatedBy: [aStream nextPutAll: self fileAccessor slash]! !
+
+
+!FileSystemEntry class methodsFor: 'instance creation' stamp: 'jmv 5/31/2016 10:23'!
+pathComponents: comps
+	| inst |
+	inst := self new.
+	inst pathComponents: comps.
+	^inst! !
+
+!FileSystemEntry class methodsFor: 'instance creation' stamp: 'jmv 5/31/2016 10:23'!
+pathComponents: comps drive: driveString
+	| inst |
+	inst := self new.
+	inst pathComponents: comps detectDrive: false.
+	inst drive: driveString.
+	^inst! !
+
+!FileSystemEntry class methodsFor: 'instance creation' stamp: 'jmv 5/31/2016 10:23'!
+pathName: aString
+	| inst |
+	inst := self new.
+	inst pathName: aString.
+	^inst! !
+
+!FileSystemEntry class methodsFor: 'class state access' stamp: 'jmv 5/31/2016 10:23'!
+releaseClassCachedState
+
+	self allSubInstancesDo: [ :each | each refresh]! !
+
+
 !DirectoryEntry methodsFor: 'actions-path' stamp: 'pb 5/25/2016 00:33'!
 / pathString
 	"Answer an instance of DirectoryEntry.
@@ -1041,10 +1041,10 @@ at: localFileName ifAbsent: block
 		on: FileDoesNotExistException
 		do: [:ex | block value]! !
 
-!DirectoryEntry methodsFor: 'dictionary-like' stamp: 'pb 5/25/2016 00:31'!
+!DirectoryEntry methodsFor: 'dictionary-like' stamp: 'jmv 5/31/2016 11:24'!
 at: localFileName put: contents
 
-	(self // localFileName) forceWriteStream: [ :stream |
+	(self // localFileName) forceWriteStreamDo: [ :stream |
 		self setContentsOf: stream to: contents ].
 	self refreshChildren.
 	^contents! !
@@ -1272,11 +1272,11 @@ releaseClassCachedState
 << aStringOrBytes 
 	self appendContents: aStringOrBytes! !
 
-!FileEntry methodsFor: 'enumeration' stamp: 'pb 5/25/2016 00:31'!
+!FileEntry methodsFor: 'enumeration' stamp: 'jmv 5/31/2016 11:24'!
 assureExistence
 	self exists ifTrue: [^self].
 	self parent assureExistence.
-	self forceWriteStream: [ :stream | ]! !
+	self forceWriteStreamDo: [ :stream | ]! !
 
 !FileEntry methodsFor: 'actions-file' stamp: 'pb 5/25/2016 01:42'!
 appendContents: aStringOrBytes 
@@ -1293,9 +1293,9 @@ binaryContents
 		answer _ stream binary contents ].
 	^ answer! !
 
-!FileEntry methodsFor: 'actions-file' stamp: 'pb 5/25/2016 00:31'!
+!FileEntry methodsFor: 'actions-file' stamp: 'jmv 5/31/2016 11:24'!
 binaryContents: aByteArray
-	self forceWriteStream: [ :stream |
+	self forceWriteStreamDo: [ :stream |
 		self setContentsOf: stream binary to: aByteArray ].
 	self refresh! !
 
@@ -1343,9 +1343,9 @@ textContents
 		answer _ stream contents ].
 	^ answer! !
 
-!FileEntry methodsFor: 'actions-file' stamp: 'pb 5/25/2016 00:31'!
+!FileEntry methodsFor: 'actions-file' stamp: 'jmv 5/31/2016 11:24'!
 textContents: aString
-	self forceWriteStream: [ :stream |
+	self forceWriteStreamDo: [ :stream |
 		self setContentsOf: stream to: aString ].
 	self refresh! !
 
@@ -1358,12 +1358,12 @@ appendStreamDo: blockWithArg
 			stream
 				ifNotNil: [ :s | s close ]]! !
 
-!FileEntry methodsFor: 'accessing-stream' stamp: 'pb 5/25/2016 00:31'!
-forceWriteStream: blockWithArg 
+!FileEntry methodsFor: 'accessing-stream' stamp: 'jmv 5/31/2016 11:23'!
+forceWriteStreamDo: blockWithArg 
 	"If the file already exists, delete it first without asking. Do not raise FileExistsException.
 	Creates the directory if it doesn't exist."
 	| stream |
-	stream _ self privateForceWriteStream.
+	stream _ self forceWriteStream.
 	[ blockWithArg value: stream ]
 		ensure: [
 			stream
@@ -1436,22 +1436,22 @@ writeStream
 	self parent exists ifFalse: [self parent assureExistence].
 	^self fileAccessor privateNewFile: self! !
 
-!FileEntry methodsFor: 'private' stamp: 'pb 5/25/2016 00:31'!
-initValuesFrom: otherEntry
-	otherEntry ifNil: [^self].
-	super initValuesFrom: otherEntry.
-	self fileSize: otherEntry fileSize! !
-
-!FileEntry methodsFor: 'private' stamp: 'pb 5/25/2016 00:31'!
-privateForceWriteStream
+!FileEntry methodsFor: 'private' stamp: 'jmv 5/31/2016 11:23'!
+forceWriteStream
 	"If the file already exists, delete it first without asking. Do not raise FileExistsException.
 	Note: You need to eventually close the stream.
-	Usually prefer #forceWriteStream: that closes the file for you.
+	Usually prefer #forceWriteStreamDo: that closes the file for you.
 	Creates the directory if it doesn't exist."
 
 	self refresh.
 	self parent exists ifFalse: [self parent assureExistence].
 	^self fileAccessor privateForceNewFile: self! !
+
+!FileEntry methodsFor: 'private' stamp: 'pb 5/25/2016 00:31'!
+initValuesFrom: otherEntry
+	otherEntry ifNil: [^self].
+	super initValuesFrom: otherEntry.
+	self fileSize: otherEntry fileSize! !
 
 !FileEntry methodsFor: 'testing' stamp: 'pb 5/25/2016 00:31'!
 exists
@@ -1596,6 +1596,49 @@ example7
 	(fileNames collect: [:eachName | dir
 				latestFileMatches: [:each | each name beginsWith: eachName]])
 		do: [:eachEnt | eachEnt copyTo: releaseDir]! !
+
+
+!FmFileEntry methodsFor: 'accessing-stream' stamp: 'jmv 5/31/2016 13:05'!
+appendStreamDo: blockWithArg 
+	| stream |
+	stream _ self privateAppendStream.
+	[ blockWithArg value: stream ]
+		ensure: [
+			stream
+				ifNotNil: [ :s | s close ]]! !
+
+!FmFileEntry methodsFor: 'accessing-stream' stamp: 'jmv 5/31/2016 13:05'!
+forceWriteStreamDo: blockWithArg 
+	"If the file already exists, delete it first without asking. Do not raise FileExistsException.
+	Creates the directory if it doesn't exist."
+	| stream |
+	stream _ self privateForceWriteStream.
+	[ blockWithArg value: stream ]
+		ensure: [
+			stream
+				ifNotNil: [ :s | s close ]]! !
+
+!FmFileEntry methodsFor: 'accessing-stream' stamp: 'jmv 5/31/2016 13:05'!
+readStreamDo: blockWithArg 
+	"Raise FileDoesNotExistException if not found."
+	| stream result |
+	stream _ self privateReadStream.
+	[ result _ blockWithArg value: stream ]
+		ensure: [
+			stream
+				ifNotNil: [ :s | s close ]].
+	^ result! !
+
+!FmFileEntry methodsFor: 'accessing-stream' stamp: 'jmv 5/31/2016 13:05'!
+writeStreamDo: blockWithArg 
+	"If the file already exists raise FileExistsException.
+	Creates the directory if it doesn't exist."
+	| stream |
+	stream _ self privateWriteStream.
+	[ blockWithArg value: stream ]
+		ensure: [
+			stream
+				ifNotNil: [ :s | s close ]]! !
 
 
 !ChangeList methodsFor: 'menu actions' stamp: 'pb 5/25/2016 01:36'!
@@ -1848,11 +1891,11 @@ scanVersionsOf: class
 	self clearSelections! !
 
 
-!FileList methodsFor: 'initialization' stamp: 'pb 5/25/2016 01:10'!
-directory: anDirectoryEntry
+!FileList methodsFor: 'initialization' stamp: 'jmv 5/31/2016 10:37'!
+directory: aDirectoryEntry
 	"Set the path of the volume to be displayed."
 
-	directory _ anDirectoryEntry.
+	directory _ aDirectoryEntry.
 
 	sortMode ifNil: [
 		sortMode _ #date.
@@ -2079,21 +2122,21 @@ Would you like to browse them?' chooseFrom: 'Ignore\Browse slips')
 		ifTrue: [ Smalltalk browseMessageList: slips name: 'Possible slips in ' , name ]! !
 
 
-!ChangeSet class methodsFor: 'services' stamp: 'pb 5/25/2016 01:31'!
-fileIn: anFileEntry
+!ChangeSet class methodsFor: 'services' stamp: 'jmv 5/31/2016 11:15'!
+fileIn: aFileEntry
 	"File in the entire contents of the file specified by the name provided"
 
-	anFileEntry ifNil: [^ Smalltalk beep ].
-	anFileEntry readStreamDo: [ :stream |
+	aFileEntry ifNil: [^ Smalltalk beep ].
+	aFileEntry readStreamDo: [ :stream |
 		stream fileIn ]! !
 
-!ChangeSet class methodsFor: 'services' stamp: 'pb 5/25/2016 01:18'!
-install: anFileEntry
+!ChangeSet class methodsFor: 'services' stamp: 'jmv 5/31/2016 10:42'!
+install: aFileEntry
 	"File in the entire contents of the file specified by the name provided.
 	Do not affect the user change sets, store changes in separate one"
 
-	ChangeSet installing: anFileEntry name do: [ self fileIn: anFileEntry ].
-	('Installed ChangeSet: ', anFileEntry name) print! !
+	ChangeSet installing: aFileEntry name do: [ self fileIn: aFileEntry ].
+	('Installed ChangeSet: ', aFileEntry name) print! !
 
 !ChangeSet class methodsFor: 'services' stamp: 'pb 5/25/2016 01:08'!
 installNewUpdates
@@ -2178,7 +2221,7 @@ changeRecordForOverriddenMethod: aMethodReference
 			ensure: [sourceFilesCopy do: [:x | x notNil ifTrue: [x close]]]
 	! !
 
-!CodePackage methodsFor: 'saving' stamp: 'pb 5/25/2016 01:08'!
+!CodePackage methodsFor: 'saving' stamp: 'jmv 5/31/2016 11:23'!
 save
 	"If we can't save, find a new destination directory."
 	fullFileName ifNotNil: [
@@ -2190,7 +2233,7 @@ save
 		fullFileName _
 			(DirectoryEntry smalltalkImageDirectory // self packageFileName) pathName ].
 
-	fullFileName asFileEntry forceWriteStream: [ :stream |
+	fullFileName asFileEntry forceWriteStreamDo: [ :stream |
 		stream timeStamp.
 		self writeOnStream: stream ].
 
@@ -2398,8 +2441,8 @@ exportDirectory
 	
 	^ DirectoryEntry smalltalkImageDirectory / self class defaultContentDirectory / 'Exported'! !
 
-!ContentPack methodsFor: 'private' stamp: 'pb 5/25/2016 01:09'!
-supportedFilesIn: anDirectoryEntry
+!ContentPack methodsFor: 'private' stamp: 'jmv 5/31/2016 10:35'!
+supportedFilesIn: aDirectoryEntry
 
 	| fileTypes supportedFiles |
 		fileTypes _ (self class mapping as: Dictionary) values.
@@ -2407,14 +2450,14 @@ supportedFilesIn: anDirectoryEntry
 	
 	fileTypes do: [ :type | 
 		supportedFiles _ supportedFiles
-			union: (anDirectoryEntry files select: [ :entry |
+			union: (aDirectoryEntry files select: [ :entry |
 				'*.' , type match: entry name ])
 	].
 
 	^ supportedFiles! !
 
 
-!SystemDictionary methodsFor: 'housekeeping' stamp: 'pb 5/25/2016 01:46'!
+!SystemDictionary methodsFor: 'housekeeping' stamp: 'jmv 5/31/2016 11:24'!
 condenseChanges
 	"Move all the changes onto a compacted sources file."
 	"
@@ -2422,7 +2465,7 @@ condenseChanges
 	"
 
 	| oldChanges classCount oldChangesLocalName oldChangesPathName |
-	DirectoryEntry smalltalkImageDirectory // 'ST80.temp' forceWriteStream: [ :f |
+	DirectoryEntry smalltalkImageDirectory // 'ST80.temp' forceWriteStreamDo: [ :f |
 		f timeStamp.
 		'Condensing Changes File...'
 			displayProgressAt: Sensor mousePoint
@@ -2533,14 +2576,14 @@ fullNameForImageNamed: aName
 	newName _ FileIOAccessor default baseNameFor: ((DirectoryEntry smalltalkImageDirectory // aName) pathName).
 	^newName , '.image'! !
 
-!SystemDictionary methodsFor: 'miscellaneous' stamp: 'pb 5/25/2016 01:14'!
+!SystemDictionary methodsFor: 'miscellaneous' stamp: 'jmv 5/31/2016 11:24'!
 logError: errMsg inContext: aContext to: localFileName
 	"Log the error message and a stack trace to the given file.
 	Smalltalk logError: 'test error message' inContext: thisContext to: 'testErr.txt'
 	"
 
 	[
-		DirectoryEntry smalltalkImageDirectory // localFileName forceWriteStream: [ :stream |
+		DirectoryEntry smalltalkImageDirectory // localFileName forceWriteStreamDo: [ :stream |
 	 	 	stream nextPutAll: errMsg; newLine.
 			aContext errorReportOn: stream ]
 	] on: Error do: [] "avoid recursive errors"! !
@@ -2740,25 +2783,25 @@ install
 	"No need to have a platform and machine specific path around anymore. It was just for installation. Clear it."
 	pathName _ nil! !
 
-!FeatureRequirement methodsFor: 'private' stamp: 'pb 5/25/2016 01:09'!
-inPackagesSubtreeOf: anDirectoryEntry do: aBlock
+!FeatureRequirement methodsFor: 'private' stamp: 'jmv 5/31/2016 10:36'!
+inPackagesSubtreeOf: aDirectoryEntry do: aBlock
 
 	| pckDir compatPckDir |
 
 	"Look in the requested directory"
-	aBlock value: anDirectoryEntry.
+	aBlock value: aDirectoryEntry.
 
 	"Look in the usual Packages subfolders"
-	pckDir _ anDirectoryEntry / 'Packages'.
+	pckDir _ aDirectoryEntry / 'Packages'.
 	pckDir exists ifTrue: [
 		aBlock value: pckDir ].
-	compatPckDir _ anDirectoryEntry / 'CompatibilityPackages'.
+	compatPckDir _ aDirectoryEntry / 'CompatibilityPackages'.
 	compatPckDir exists ifTrue: [
 		aBlock value: compatPckDir ].
 
 	"Finally look in folders that follow the convention of naming package repositories
 	with the 'Cuis-Smalltalk' prefix, and their possible 'Packages' subdir."
-	anDirectoryEntry children do: [ :entry |
+	aDirectoryEntry children do: [ :entry |
 		(entry isDirectory and: [ entry name beginsWith: 'Cuis-Smalltalk' ]) ifTrue: [
 			aBlock value: entry.
 			pckDir _ entry / 'Packages'.
@@ -2792,6 +2835,24 @@ placesToLookForPackagesDo: aBlock
 	self inPackagesSubtreeOf: base do: aBlock! !
 
 
+!Form methodsFor: 'fileIn/Out' stamp: 'jmv 5/31/2016 11:24'!
+writeOnFileNamed: fileName 
+	"Saves the receiver on the file fileName in the format:
+		fileCode, depth, extent, offset, bits."
+
+	fileName asFileEntry forceWriteStreamDo: [ :file |
+		file binary.
+		file nextPut: 2.  "file code = 2"
+		self writeOn: file ].
+
+"
+ | f |
+[(f _ Form fromUser) boundingBox area>25] whileTrue:
+	[f writeOnFileNamed: 'test.form'.
+	(Form fromFileNamed: 'test.form') display].
+"! !
+
+
 !Form class methodsFor: 'instance creation' stamp: 'pb 5/25/2016 01:33'!
 fromFileEntry: aFileEntry
 	"Read a Form or ColorForm from the given file."
@@ -2810,6 +2871,13 @@ formFromFileNamed: fileName
 		stream useBytes.
 		self formFromStream: stream ]! !
 
+!ImageReadWriter class methodsFor: 'image reading/writing' stamp: 'jmv 5/31/2016 11:24'!
+putForm: aForm onFileNamed: filename
+	"Store the given form on a file of the given name."
+
+	filename asFileEntry forceWriteStreamDo: [ :stream |
+		(self onBinaryStream: stream binary) nextPutImage: aForm ]! !
+
 !ImageReadWriter class methodsFor: 'image reading/writing' stamp: 'pb 5/25/2016 01:20'!
 write: aForm onFileNamed: filename
 
@@ -2818,6 +2886,15 @@ write: aForm onFileNamed: filename
 			cls putForm: aForm onFileNamed: filename ]
 		ifNil: [
 			self write: aForm onFileNamed: filename, '.bmp' ]! !
+
+
+!JPEGReadWriter2 class methodsFor: 'image reading/writing' stamp: 'jmv 5/31/2016 11:24'!
+putForm: aForm quality: quality progressiveJPEG: progressiveFlag onFileNamed: fileName
+	"Store the given Form as a JPEG file of the given name, overwriting any existing file of that name. Quality goes from 0 (low) to 100 (high), where -1 means default. If progressiveFlag is true, encode as a progressive JPEG."
+
+	fileName asFileEntry forceWriteStreamDo: [ :stream |
+		(self onBinaryStream: stream binary)
+			nextPutImage: aForm quality: quality progressiveJPEG: progressiveFlag ]! !
 
 
 !InstructionPrinter class methodsFor: 'printing' stamp: 'pb 5/25/2016 01:37'!
@@ -2833,6 +2910,17 @@ printClass: class
 	"
 	InstructionPrinter printClass: Parser.
 	"! !
+
+
+!ContextPart class methodsFor: 'examples' stamp: 'jmv 5/31/2016 11:23'!
+trace: aBlock onFileNamed: fileName
+	"
+	ContextPart trace: [3 factorial] onFileNamed: 'trace'
+	"
+	"This method uses the simulator to print calls to a file."
+
+	fileName asFileEntry forceWriteStreamDo: [ :stream |
+		self trace: aBlock on: stream ]! !
 
 
 !CodeFileBrowserWindow class methodsFor: 'services' stamp: 'pb 5/25/2016 01:31'!
@@ -2934,13 +3022,13 @@ printSpaceAnalysis
 	DirectoryEntry smalltalkImageDirectory // 'STspace.text' writeStreamDo: [ :stream |
 		self printSpaceAnalysis: 1 on: stream ]! !
 
-!SpaceTally methodsFor: 'fileOut' stamp: 'pb 5/25/2016 01:34'!
+!SpaceTally methodsFor: 'fileOut' stamp: 'jmv 5/31/2016 11:22'!
 printSpaceDifferenceFrom: fileName1 to: fileName2
 	"For differential results, run printSpaceAnalysis twice with different fileNames,
 	then run this method...
-		'STspace.text1' asFileEntry writeStream: [ :stream | SpaceTally new printSpaceAnalysis: 0 on: stream ].
+		'STspace.text1' asFileEntry writeStreamDo: [ :stream | SpaceTally new printSpaceAnalysis: 0 on: stream ].
 			--- do something that uses space here ---
-		'STspace.text2' asFileEntry writeStream: [ :stream | SpaceTally new printSpaceAnalysis: 0 on: stream ].
+		'STspace.text2' asFileEntry writeStreamDo: [ :stream | SpaceTally new printSpaceAnalysis: 0 on: stream ].
 		SpaceTally new printSpaceDifferenceFrom: 'STspace.text1' to: 'STspace.text2'
 "
 	| coll1 coll2 item |
@@ -2966,7 +3054,7 @@ printSpaceDifferenceFrom: fileName1 to: fileName2
 		openLabel: 'Differential Space Analysis'.
 ! !
 
-!SpaceTally methodsFor: 'fileOut' stamp: 'pb 5/25/2016 01:12'!
+!SpaceTally methodsFor: 'fileOut' stamp: 'jmv 5/31/2016 11:24'!
 saveTo: aFileName
 	"
 	| st |
@@ -2975,7 +3063,7 @@ saveTo: aFileName
 	st saveTo: 'spaceTally2'
 	"
 
-	DirectoryEntry smalltalkImageDirectory // aFileName forceWriteStream: [ :stream |
+	DirectoryEntry smalltalkImageDirectory // aFileName forceWriteStreamDo: [ :stream |
 		results do: [ :each |
 				stream nextPutAll: each analyzedClassName asString; 
 						nextPutAll: ' '; nextPutAll: each codeSize printString; 
@@ -3112,6 +3200,38 @@ saveWorldInFile
 		fileStream fileOutObject: myWorld ]! !
 
 
+!Transcript class methodsFor: 'preferred protocol' stamp: 'jmv 5/31/2016 11:24'!
+clear
+
+	accessSemaphore critical: [
+		"Having at least one entry simplifies handling of the entries circular collection"
+		firstIndex _ 1.
+		lastIndex _ 1.
+		entries at: 1 put: 'Transcript'.	
+		unfinishedEntry reset.
+		lastDisplayPosition _ 0.
+		
+		logToFile ifTrue: [
+			self filename asFileEntry forceWriteStreamDo: [ :stream |
+				stream nextPutAll: 'Transcript log started: '.
+				DateAndTime now printOn: stream.
+				stream
+					newLine;
+					nextPutAll: '------------------------------------------------------------------------';
+					newLine ]]].
+	self display! !
+
+!Transcript class methodsFor: 'preferred protocol' stamp: 'jmv 5/31/2016 11:24'!
+clearFile
+	accessSemaphore critical: [
+		self filename asFileEntry forceWriteStreamDo: [ :stream |
+			stream nextPutAll: 'Transcript log started: '.
+			DateAndTime now printOn: stream.
+			stream
+				newLine;
+				nextPutAll: '------------------------------------------------------------------------';
+				newLine ]]! !
+
 !Transcript class methodsFor: 'private' stamp: 'pb 5/25/2016 01:30'!
 addEntry: aString logToFile: otherString
 	"Add a new entrie to the entries circular list. If full, a new entry will replace the oldest one."
@@ -3130,16 +3250,47 @@ addEntry: aString logToFile: otherString
 				stream nextPutAll: otherString ]]
 	]! !
 
-!methodRemoval: FileEntry #appendStream:!
-FileEntry removeSelector: #appendStream:!
-!methodRemoval: FileEntry #privateAppendStream!
-FileEntry removeSelector: #privateAppendStream!
-!methodRemoval: FileEntry #privateReadStream!
-FileEntry removeSelector: #privateReadStream!
-!methodRemoval: FileEntry #privateWriteStream!
-FileEntry removeSelector: #privateWriteStream!
-!methodRemoval: FileEntry #readStream:!
-FileEntry removeSelector: #readStream:!
-!methodRemoval: FileEntry #writeStream:!
-FileEntry removeSelector: #writeStream:!
+
+!Utilities class methodsFor: 'vm statistics' stamp: 'jmv 5/31/2016 11:24'!
+reportCPUandRAM
+	"Write several text files with useful analysis for profiling purposes.
+	Overwrites any existing report.
+	Utilities reportCPUandRAM
+	"	
+
+	| profiler |
+	
+	"VM statistics (Memory use and GC, mainly)"
+	'MemoryStats.txt' asFileEntry forceWriteStreamDo: [ :stream |
+		stream nextPutAll: self vmStatisticsReportString ].
+	
+	"Process list"
+	'ProcessList.txt' asFileEntry forceWriteStreamDo: [ :stream |
+		ProcessBrowser new processNameList 
+			do: [ :each | 
+				stream nextPutAll: each; newLine ]].
+
+"Fork all these, so they run in sequence, as the system is back running"
+[
+	
+	"Process taking most CPU"
+	'ThePig.txt' asFileEntry forceWriteStreamDo: [ :stream |
+		ProcessBrowser dumpPigStackOn: stream ].
+	
+	"Tally of all processes"
+	AndreasSystemProfiler canWork ifTrue: [
+		'FullTally.txt' asFileEntry forceWriteStreamDo: [ :stream |
+			profiler _ AndreasSystemProfiler new.
+			profiler spyOn: [ (Delay forMilliseconds: 1000) wait ].
+			profiler
+				reportTextOn: stream
+				linesOn: (DummyStream on: nil)
+				talliesOn: (DummyStream on: nil) ]].
+
+	"Memory Analysis"
+	'MemoryAnalysis.txt' asFileEntry forceWriteStreamDo: [ :stream |
+		SpaceTally new printSpaceAnalysis: 1 on: stream ]
+
+] forkNamed: 'CPU usage analysis'! !
+
 FileIOAccessor initialize!
