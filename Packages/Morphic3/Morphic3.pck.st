@@ -1,9 +1,8 @@
 'From Cuis 5.0 of 7 November 2016 [latest update: #3364] on 6 July 2018 at 8:59:15 am'!
 'Description Please enter a description for this package '!
-!provides: 'Morphic3' 1 50!
+!provides: 'Morphic3' 1 51!
 !requires: 'LinearAlgebra' 1 nil nil!
 !requires: 'YAXO' 1 nil nil!
-!requires: 'OpenCL' 1 nil nil!
 SystemOrganization addCategory: #'Morphic3-Kernel'!
 SystemOrganization addCategory: #'Morphic3-SVG'!
 SystemOrganization addCategory: #'Morphic3-SVG shapes'!

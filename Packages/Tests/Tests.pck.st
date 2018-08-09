@@ -1,12 +1,12 @@
 'From Cuis 5.0 of 7 November 2016 [latest update: #3395] on 4 August 2018 at 3:02:56 pm'!
 'Description test that verifies that #should:raise: can expect Exception'!
-!provides: 'Tests' 1 86!
+!provides: 'Tests' 1 87!
 !requires: 'Math 3D' 1 nil nil!
 !requires: 'Collections-CompactArrays' 1 nil nil!
 !requires: 'YAXO' 1 nil nil!
 !requires: 'Morphic-Widgets-Extras' 1 nil nil!
 !requires: 'Compression' 1 nil nil!
-!requires: 'SignalProcessing' 1 nil nil!
+!requires: 'ImageProcessing' 1 nil nil!
 !requires: 'Graphics-Files-Additional' 1 nil nil!
 SystemOrganization addCategory: #'Tests-Exceptions'!
 SystemOrganization addCategory: #'Tests-Kernel-Numbers'!

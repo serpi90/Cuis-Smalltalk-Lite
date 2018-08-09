@@ -1,8 +1,11 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #2995] on 6 December 2016 at 1:02:59 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3401] on 9 August 2018 at 6:16:32 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Cartography' 1 11!
+!provides: 'Cartography' 1 12!
 !requires: 'Math 3D' 1 4 nil!
 !requires: 'Graphics-Files-Additional' 1 4 nil!
+SystemOrganization addCategory: #Cartography!
+
+
 !classDefinition: #GPSPosition category: #Cartography!
 Float64Array variableWordSubclass: #GPSPosition
 	instanceVariableNames: ''
@@ -97,6 +100,33 @@ altitude
 	"Altitude is in meters. 0.0 is the WGS 84 ellipsoid."
 	^ self at: 3! !
 
+!GPSPosition methodsFor: 'accessing' stamp: 'jmv 3/2/2015 13:34'!
+height
+	"Altitude is in meters. 0.0 is the WGS 84 ellipsoid."
+	^ self at: 3! !
+
+!GPSPosition methodsFor: 'accessing' stamp: 'jmv 3/2/2015 14:00'!
+lambda
+	"Longitude is in degrees, 0.0 is close to Greenwich. Positive values are east of Greenwich, negative values are west."
+	^ self at: 2! !
+
+!GPSPosition methodsFor: 'accessing' stamp: 'jmv 3/2/2015 13:34'!
+latitude
+	"Latitude is geodetic, in degrees. Positive values are north the equator, negative values are south."
+	^ self at: 1! !
+
+!GPSPosition methodsFor: 'accessing' stamp: 'jmv 3/2/2015 15:19'!
+longitude
+	"Longitude is in degrees, 0.0 is close to Greenwich. Positive values are east of Greenwich, negative values are west.
+	Greenwich observatory is about 100 metres away from 0.0. 
+	See http://www.thegreenwichmeridian.org/tgm/articles.php?article=7"
+	^ self at: 2! !
+
+!GPSPosition methodsFor: 'accessing' stamp: 'jmv 3/2/2015 14:00'!
+phi
+	"Latitude is geodetic, in degrees. Positive values are north the equator, negative values are south."
+	^ self at: 1! !
+
 !GPSPosition methodsFor: 'converting' stamp: 'jmv 9/18/2015 17:06'!
 asECEF
 	"Convert from geodetic coordinates to ECEF(also called ECF, called ECR by Landsat docs) Cartesian Coordinates.
@@ -144,42 +174,6 @@ asECEFSpherical
 	z _ magnitude * latitude sin.
 	^ Float64Vector3 x: x y: y z: z! !
 
-!GPSPosition methodsFor: 'accessing' stamp: 'jmv 3/2/2015 13:34'!
-height
-	"Altitude is in meters. 0.0 is the WGS 84 ellipsoid."
-	^ self at: 3! !
-
-!GPSPosition methodsFor: 'accessing' stamp: 'jmv 3/2/2015 14:00'!
-lambda
-	"Longitude is in degrees, 0.0 is close to Greenwich. Positive values are east of Greenwich, negative values are west."
-	^ self at: 2! !
-
-!GPSPosition methodsFor: 'accessing' stamp: 'jmv 3/2/2015 13:34'!
-latitude
-	"Latitude is geodetic, in degrees. Positive values are north the equator, negative values are south."
-	^ self at: 1! !
-
-!GPSPosition methodsFor: 'accessing' stamp: 'jmv 3/2/2015 15:19'!
-longitude
-	"Longitude is in degrees, 0.0 is close to Greenwich. Positive values are east of Greenwich, negative values are west.
-	Greenwich observatory is about 100 metres away from 0.0. 
-	See http://www.thegreenwichmeridian.org/tgm/articles.php?article=7"
-	^ self at: 2! !
-
-!GPSPosition methodsFor: 'accessing' stamp: 'jmv 3/2/2015 14:00'!
-phi
-	"Latitude is geodetic, in degrees. Positive values are north the equator, negative values are south."
-	^ self at: 1! !
-
-!GPSPosition methodsFor: 'printing' stamp: 'jmv 12/2/2016 11:32:28'!
-shortPrintString
-	^String streamContents: [ :strm |
-		strm nextPut: $(.
-		self latitude printOn: strm fractionDigits: 5.
-		strm nextPutAll: ','.
-		self longitude printOn: strm fractionDigits: 5.
-		strm nextPut: $) ]! !
-
 !GPSPosition methodsFor: 'converting' stamp: 'jmv 9/30/2015 12:34'!
 withHeight: h
 	"
@@ -195,6 +189,15 @@ withZeroHeight
 	(GPSPosition fromECEF: (GPSPosition latitude: 65 longitude: -151 altitude: 100) asECEF) withZeroHeight
 	"
 	^ self withHeight: 0.0! !
+
+!GPSPosition methodsFor: 'printing' stamp: 'jmv 12/2/2016 11:32:28'!
+shortPrintString
+	^String streamContents: [ :strm |
+		strm nextPut: $(.
+		self latitude printOn: strm fractionDigits: 5.
+		strm nextPutAll: ','.
+		self longitude printOn: strm fractionDigits: 5.
+		strm nextPut: $) ]! !
 
 !GPSPosition class methodsFor: 'instance creation' stamp: 'jmv 9/30/2015 09:01'!
 fromECEF: aPoint3D
@@ -261,9 +264,21 @@ latitude: phi longitude: lambda altitude: h
 		at: 3 put: h;
 		yourself! !
 
+!GPSPosition class methodsFor: 'instance creation' stamp: 'jmv 8/9/2018 16:51:22'!
+latitudeDegrees: latDeg minutes: latMin seconds: latSec longitudeDegrees: lonDeg minutes: lonMin seconds: lonSec
+
+	^ self
+		latitude: latSec/60.0+latMin / 60.0 + latDeg
+		longitude: lonSec/60.0+lonMin / 60.0 + lonDeg
+		altitude: 0.0! !
+
 !GPSPosition class methodsFor: 'instance creation' stamp: 'jmv 4/7/2015 15:04'!
 longitude: lambda latitude: phi altitude: h
 	^ self latitude: phi longitude: lambda altitude: h! !
+
+!GPSPosition class methodsFor: 'instance creation' stamp: 'jmv 3/2/2015 13:21'!
+numElements
+	^3! !
 
 !GPSPosition class methodsFor: 'aux functions' stamp: 'jmv 3/2/2015 13:57'!
 normalAtLatitude: phi
@@ -276,10 +291,6 @@ normalAtLatitude: phi
 	a _ self wgs84SemiMajorAxis.
 	eSquared _ self wgs84FirstEccentricitySquared.
 	^ a / (1 - (eSquared * phi degreesToRadians sin squared)) sqrt! !
-
-!GPSPosition class methodsFor: 'instance creation' stamp: 'jmv 3/2/2015 13:21'!
-numElements
-	^3! !
 
 !GPSPosition class methodsFor: 'constants' stamp: 'jmv 3/2/2015 15:58'!
 wgs84FirstEccentricitySquared
