@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3364] on 6 July 2018 at 8:59:44 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3399] on 9 August 2018 at 2:33:06 pm'!
 'Description Please enter a description for this package '!
-!provides: 'LinearAlgebra' 1 48!
+!provides: 'LinearAlgebra' 1 49!
 !requires: 'Collections-CompactArrays' 1 2 nil!
 SystemOrganization addCategory: #LinearAlgebra!
 
@@ -237,8 +237,60 @@ as32bitForm: aBlock
 			index _ index + 1 ]].
 	^answer! !
 
-!Matrix methodsFor: 'conversion' stamp: 'jmv 6/25/2018 15:23:51'!
-as8bitForm: aBlock
+!Matrix methodsFor: 'conversion' stamp: 'jmv 8/9/2018 13:39:11'!
+asForm
+	"Assume the receiver is normalized in [0.0 .. 255/256.0]. Clip values out of range.
+	
+	Consider calling the much faster #asFormQuick"
+	
+	^ self asFormMin: 0.0 max: 255/256.0! !
+
+!Matrix methodsFor: 'conversion' stamp: 'jmv 8/9/2018 13:42:37'!
+asFormAutoRange
+	"Answer a 8bit Form with gray values.
+	Map used range of pixel values to available gray values."
+
+	^ self asFormMin: elements min max: elements max! !
+
+!Matrix methodsFor: 'conversion' stamp: 'jmv 8/9/2018 13:51:07'!
+asFormAutoRangeG: greenMatrix b: blueMatrix
+
+	| min max |
+	min _ (self min min: greenMatrix min) min: blueMatrix min.
+	max _ (self max max: greenMatrix max) max: blueMatrix max.
+	^self asFormG: greenMatrix b: blueMatrix min: min max: max! !
+
+!Matrix methodsFor: 'conversion' stamp: 'jmv 8/9/2018 13:52:02'!
+asFormG: greenMatrix b: blueMatrix
+	"Assume the receiver and arguments are normalized in [0.0 .. 255/256.0]. Clip values out of range.
+	Redefined in subclasses for performance."
+
+	^self asFormG: greenMatrix b: blueMatrix min: 0.0 max: 255/256.0! !
+
+!Matrix methodsFor: 'conversion' stamp: 'jmv 6/25/2018 15:24:21'!
+asFormG: greenMatrix b: blueMatrix min: min max: max
+	| k r g b blueElements greenElements |
+	k _ 255.0 / (max-min).
+	greenElements _ greenMatrix elements.
+	blueElements _ blueMatrix elements.
+	^ self as32bitForm: [ :index :word |
+		r _ (((elements at: index) - min) * k + 0.5) truncated min: 255 max: 0.
+		g _ (((greenElements at: index) - min) * k + 0.5) truncated min: 255 max: 0.
+		b _ (((blueElements at: index) - min) * k + 0.5) truncated min: 255 max: 0.
+		word at: 1 put: b; at: 2 put: g; at: 3 put: r ]! !
+
+!Matrix methodsFor: 'conversion' stamp: 'jmv 8/9/2018 13:42:46'!
+asFormMin: min max: max
+	"Answer a 8bit Form with gray values.
+	Map requested range of pixel values to available gray values."
+
+	| k |
+	k _ 255.0 / (max-min).
+	^ self asGrayForm: [ :index |
+		(((elements at: index) - min) * k + 0.5) truncated min: 255 max: 0 ]! !
+
+!Matrix methodsFor: 'conversion' stamp: 'jmv 8/9/2018 13:05:32'!
+asGrayForm: aBlock
 	"Fill an 8-bit GrayForm with gray values."
 
 	| answer bits bitsIndex elementsIndex bytesPerRow |
@@ -254,52 +306,24 @@ as8bitForm: aBlock
 			bits byteAt: bitsIndex put: (aBlock value: elementsIndex) bigEndian: answer isBigEndian ]].
 	^answer! !
 
-!Matrix methodsFor: 'conversion' stamp: 'jmv 5/4/2016 11:18'!
-asForm
-	"Answer a Form with gray values.
-	Map used range of pixel values to available gray values.
-	Do not apply any gamma.
-	
-	Each subclass might do it differently:
-	- mapping the used range of values or some arbitrary range
-	- applying or not gamma correction (to make a linear range look linear to our eyes, using nonlinear mapping)"
-
-	| max min |
+!Matrix methodsFor: 'conversion' stamp: 'jmv 8/9/2018 14:02:03'!
+asGrayGreenForm
+	"Make positive values gray, and negative values green.
+	Use brightness for magnitude (absolute value).
+	Map used range of pixel values to available gray values."
+	| max min k b g r |
 	min _ self min.
 	max _ self max.
 	max > min ifFalse: [
 		max _ min + 1 ].
-	^self asFormMin: min max: max! !
 
-!Matrix methodsFor: 'conversion' stamp: 'jmv 9/2/2014 12:07'!
-asFormG: greenMatrix b: blueMatrix
-
-	| min max |
-	min _ (self min min: greenMatrix min) min: blueMatrix min.
-	max _ (self max max: greenMatrix max) max: blueMatrix max.
-	^self asFormG: greenMatrix b: blueMatrix min: min max: max! !
-
-!Matrix methodsFor: 'conversion' stamp: 'jmv 6/25/2018 15:24:21'!
-asFormG: greenMatrix b: blueMatrix min: min max: max
-	| k r g b blueElements greenElements |
-	k _ 255.0 / (max-min).
-	greenElements _ greenMatrix elements.
-	blueElements _ blueMatrix elements.
+	k _ 255.0 / (max max: min negated).
 	^ self as32bitForm: [ :index :word |
-		r _ (((elements at: index) - min) * k + 0.5) truncated min: 255 max: 0.
-		g _ (((greenElements at: index) - min) * k + 0.5) truncated min: 255 max: 0.
-		b _ (((blueElements at: index) - min) * k + 0.5) truncated min: 255 max: 0.
+		g _ (((elements at: index) abs) * k + 0.5) truncated min: 255 max: 0.
+		(elements at: index) > 0
+			ifTrue: [ r _ b _ g ]
+			ifFalse: [ r _ b _ 0 ].
 		word at: 1 put: b; at: 2 put: g; at: 3 put: r ]! !
-
-!Matrix methodsFor: 'conversion' stamp: 'jmv 6/25/2018 15:25:22'!
-asFormMin: min max: max
-	"Answer a 8bit Form with gray values.
-	Map used range of pixel values to available gray values."
-
-	| k |
-	k _ 255.0 / (max-min).
-	^ self as8bitForm: [ :index |
-		(((elements at: index) - min) * k + 0.5) truncated min: 255 max: 0 ]! !
 
 !Matrix methodsFor: 'conversion' stamp: 'jmv 6/25/2018 13:43:26'!
 asHeatmap: aBlock minVal: minVal maxVal: maxVal
@@ -725,18 +749,76 @@ subMatrixTopLeft: aPoint bottomRight: bPoint
 subMatrixTopLeft: aPoint size: sizePoint
 	^ self subMatrixTopLeft: aPoint bottomRight: aPoint + sizePoint - 1! !
 
-!Matrix methodsFor: 'displaying' stamp: 'jmv 5/4/2016 10:55'!
+!Matrix methodsFor: 'displaying' stamp: 'jmv 8/9/2018 14:29:22'!
 display
-	self displayAt: 0@0! !
 
-!Matrix methodsFor: 'displaying' stamp: 'jmv 5/4/2016 11:16'!
+	^self displayAt: 0@0 zoom: 1! !
+
+!Matrix methodsFor: 'displaying' stamp: 'jmv 8/9/2018 14:24:43'!
+displayAsHeatmapAt: aPoint zoom: scale
+	"Uses Nearest Neighbor interpolation, to help see each pixel. Usually useful to view very small images, such as PSFs
+	
+	FloatImage lena displayAsHeatmapAt: 10@10 zoom: 4
+	(FloatImage lena copy: (120@120 extent: 30@30)) displayAsHeatmapAt: 10@10 zoom: 15
+	(FloatImage lena -0.5 * 2 copy: (120@120 extent: 30@30)) displayAsHeatmapAt: 10@10 zoom: 15
+	"
+	"Use Jet heatmap color. Zero is green. 1 is red. -1 is blue."
+	| form |
+	form _ self asHeatmap: [ :index | elements at: index ] minVal: -1 maxVal: 1.
+	scale = 1 ifFalse: [
+		form _ form magnifyBy: scale ].
+	form displayAt: aPoint.
+	^ form! !
+
+!Matrix methodsFor: 'displaying' stamp: 'jmv 8/9/2018 14:29:14'!
 displayAt: aPoint
-	"Display receiver, using default conversion to Form.
-	Each subclass might do it differently:
-	- mapping the used range of values or some arbitrary range
-	- applying or not gamma correction (to make a linear range look linear to our eyes, using nonlinear mapping)"
+	"Display receiver, using default conversion to Form."
 
-	self asForm displayAt: aPoint! !
+	^ self displayAt: aPoint zoom: 1! !
+
+!Matrix methodsFor: 'displaying' stamp: 'jmv 8/9/2018 14:22:59'!
+displayAt: aPoint zoom: scale
+	"Display receiver, using default conversion to Form."
+
+	| form |
+	form _ self asForm.
+	scale = 1 ifFalse: [
+		form _ form magnifyBy: scale ].
+	form displayAt: aPoint.
+	^ form! !
+
+!Matrix methodsFor: 'displaying' stamp: 'jmv 8/9/2018 14:29:08'!
+displayAutoRangeAt: aPoint
+	"Display receiver, mapping used range to available gray levels"
+
+	^ self displayAutoRangeAt: aPoint zoom: 1! !
+
+!Matrix methodsFor: 'displaying' stamp: 'jmv 8/9/2018 14:28:00'!
+displayAutoRangeAt: aPoint zoom: scale
+	"Display receiver, mapping used range to available gray levels"
+
+	| form |
+	form _ self asFormAutoRange.
+	scale = 1 ifFalse: [
+		form _ form magnifyBy: scale ].
+	form displayAt: aPoint.
+	^ form! !
+
+!Matrix methodsFor: 'displaying' stamp: 'jmv 8/9/2018 14:28:07'!
+displayGrayGreenAt: aPoint zoom: scale
+	"Uses Nearest Neighbor interpolation, to help see each pixel. Usually useful to view very small images, such as PSFs
+	
+	FloatImage lena displayGrayGreenAt: 10@10 zoom: 4
+	(FloatImage lena copy: (120@120 extent: 30@30)) displayGrayGreenAt: 10@10 zoom: 15
+	(FloatImage lena -0.5 * 2 copy: (120@120 extent: 30@30)) displayGrayGreenAt: 10@10 zoom: 15
+	"
+
+	| form |
+	form _ self asGrayGreenForm.
+	scale = 1 ifFalse: [
+		form _ form magnifyBy: scale ].
+	form displayAt: aPoint.
+	^ form! !
 
 !Matrix methodsFor: 'private' stamp: 'jmv 7/19/2012 12:35'!
 epsilon
@@ -994,12 +1076,12 @@ withRows: aCollectionOfRows
 	"
 	^self fromArrayOfArrays: aCollectionOfRows! !
 
-!ByteMatrix methodsFor: 'conversion' stamp: 'jmv 6/25/2018 15:25:04'!
+!ByteMatrix methodsFor: 'conversion' stamp: 'jmv 8/9/2018 13:39:30'!
 asForm
 	"Our pixel values are already constrained to 0..255.
 	Converting to an 8bit gray Form is straightforward."
 
-	^ self as8bitForm: [ :index | elements at: index ]! !
+	^ self asGrayForm: [ :index | elements at: index ]! !
 
 !ByteMatrix methodsFor: 'conversion' stamp: 'jmv 5/12/2016 18:30'!
 fillFrom32BitForm: aForm component: aSymbol
@@ -1071,46 +1153,6 @@ initializeElements
 	"Answer a new instance. Don't affect receiver or argument in any way."
 
 	^self copy -= aFloatMatrixOrNumber! !
-
-!FloatMatrix methodsFor: 'conversion' stamp: 'jmv 6/25/2018 15:25:19'!
-asGammaFormFullRange
-	"See comment at #fullRangeDisplayAt:"
-
-	| min scale |
-	min _ elements min.
-	scale _ elements max-min.
-	scale _ scale > 0.0
-		ifTrue: [ 1.0 / scale ]
-		ifFalse: [ 1.0 ].
-	^self as8bitForm: [ :index | | value |
-		value _ Color linearTosRGBGamma: (elements at: index)-min * scale.
-		(value * 255 + 0.5) truncated ]! !
-
-!FloatMatrix methodsFor: 'conversion' stamp: 'jmv 5/4/2016 11:09'!
-asGammaFormFullRangeG: greenImage b: blueImage
-	"Assume all three images are exactly the same size.
-	See comment at #fullRangeDisplayAt:"
-
-	| answer bits rElements rMin rScale gElements gMin gScale bElements bMin bScale b g r word |
-	answer _ Form extent: width@height depth: 32.
-	bits _ answer bits.
-	rElements _ self elements.
-	rMin _ rElements min.
-	rScale _ rElements max - rMin. rScale _ rScale > 0.0 ifTrue: [ 1.0 / rScale ] ifFalse: [ 0.0 ].
-	gElements _ greenImage elements.
-	gMin _ gElements min.
-	gScale _ gElements max - gMin. gScale _ gScale > 0.0 ifTrue: [ 1.0 / gScale ] ifFalse: [ 0.0 ].
-	gScale print.
-	bElements _ blueImage elements.
-	bMin _ bElements min.
-	bScale _ bElements max - bMin. bScale _ bScale > 0.0 ifTrue: [ 1.0 / bScale ] ifFalse: [ 0.0 ].
-	1 to: elements size do: [ :i |
-		r _ ((Color linearTosRGBGamma: (rElements at: i)-rMin * rScale) * 255 + 0.5) truncated.
-		g _ ((Color linearTosRGBGamma: (gElements at: i)-gMin * gScale) * 255 + 0.5) truncated.
-		b _ ((Color linearTosRGBGamma: (bElements at: i)-bMin * bScale) * 255 + 0.5) truncated.
-		word _ (r bitShift: 16) + (g bitShift: 8) + b.
-		bits integerAt: i put: word ].
-	^answer! !
 
 !FloatMatrix methodsFor: 'conversion' stamp: 'jmv 7/18/2016 11:12:10'!
 fillFrom32BitForm: aForm component: aSymbol
@@ -2045,26 +2087,6 @@ j: j put: column
 	"
 
 	self copyFromTile: column position: j@1! !
-
-!FloatMatrix methodsFor: 'displaying' stamp: 'jmv 5/4/2016 11:05'!
-fullRangeDisplayAt: aPoint
-	"Assume the values are not normalized in the scale 0.0 to 1.0.
-	Apply appropriate scaling to use viewable dynamic range to show receiver actual range of values.
-	Assume receiver is in linear scale.
-	Apply appropriate gamma encoding to make good use of pixel dynamic range.
-	(See #linearSpaceToGammaEncoded and #linearSpaceToGammaEncoded)"
-
-	self asGammaFormFullRange displayAt: aPoint! !
-
-!FloatMatrix methodsFor: 'displaying' stamp: 'jmv 5/4/2016 11:09'!
-fullRangeG: greenImage b: blueImage displayAt: aPoint
-	"Assume the values are not normalized in the scale 0.0 to 1.0.
-	Apply appropriate scaling to use viewable dynamic range to show receiver actual range of values.
-	Assume receiver is in linear scale.
-	Apply appropriate gamma encoding to make good use of pixel dynamic range.
-	(See #linearSpaceToGammaEncoded and #linearSpaceToGammaEncoded)"
-
-	(self asGammaFormFullRangeG: greenImage b: blueImage) displayAt: aPoint! !
 
 !FloatMatrix methodsFor: 'initialization' stamp: 'jmv 6/18/2001 19:10'!
 initializeElements

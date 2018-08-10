@@ -1,8 +1,8 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3327] on 14 May 2018 at 10:11:05 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3398] on 9 August 2018 at 11:35:17 am'!
 'Description Please enter a description for this package '!
-!provides: 'Sound' 1 18!
-!requires: 'Compression' 1 nil nil!
+!provides: 'Sound' 1 19!
 !requires: 'Collections-CompactArrays' 1 2 nil!
+!requires: 'Compression' 1 nil nil!
 SystemOrganization addCategory: #'Sound-Synthesis'!
 SystemOrganization addCategory: #'Sound-Scores'!
 SystemOrganization addCategory: #'Sound-System-Support'!
@@ -12817,11 +12817,11 @@ shutDown
 	SoundPlayer shutDown
 ! !
 
-!SoundSystem methodsFor: 'misc' stamp: 'jmv 6/7/2013 21:56'!
+!SoundSystem methodsFor: 'misc' stamp: 'jmv 8/9/2018 11:33:08'!
 soundNameFromUser
 	"Pop up a list of available sound names and answer the one the user chooses, or nil if no choice made"
 
-	^ (SelectionMenu selections: self sampledSoundChoices asSortedArray) startUpWithCaption: 'Sounds'
+	^ (SelectionMenu selections: self sampledSoundChoices sorted) startUpWithCaption: 'Sounds'
 
 "
 SoundService default soundNameFromUser
